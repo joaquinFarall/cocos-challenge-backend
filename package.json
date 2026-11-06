@@ -1,8 +1,8 @@
 {
   "name": "cocos-challenge-backend",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Cocos backend challenge",
+  "author": "Joaquin Casado Farall",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
