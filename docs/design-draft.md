@@ -7,13 +7,21 @@
 
 
 ## API
+Decisions and their rationale are recorded in `docs/decisions.md` (ADR numbers in brackets). Spec: `docs/backend-challenge.md`.
+
+Common rules:
+  - snake_case in requests and responses [ADR-07]
+  - money and yield are decimal strings with at most 2 decimals; size/shares are integers [ADR-07]
+  - path id matches ^[1-9]\d*$ and is <= 2147483647, otherwise 400 [ADR-02]
+  - 400 malformed request (DTO), 404 user not found, 422 business rule violated (nothing persisted), 201 + REJECTED valid order without enough cash/shares [ADR-03]
+
 ### /users/:id/portfolio
 Method: GET
 
 Params:
   - path:
     - id: user id
-  
+
 Response status:
   - 200: success
   - 404: user not found
@@ -35,6 +43,9 @@ Response body:
 Considerations:
   - id has valid format
   - user id exists
+  - a user with no orders returns 200 with zeros and an empty assets list
+  - positions with 0 shares are not listed
+  - total_value = total_cash + sum(shares * last close); NEW orders don't affect it
 
 
 ### /assets
@@ -44,39 +55,52 @@ Params:
   - query:
     - name: asset name
     - ticker: asset ticker
-  
+    - page: default 1
+    - limit: default 20, max 100
+
 Response status:
   - 200: success
   - 400: bad request
 
-Response body (Array):
-  - id
-  - ticker
-  - name
-  - type
-  - last_close
-  
-Considerations:
-  - no params returns all the assets
-  - only accepts params name and ticker
-  - the search is partial match
-  - when search criteria is not matched returns [] with 200
+Response body:
+  - data (Array):
+    - id
+    - ticker
+    - name
+    - type
+    - last_close (null when the instrument has no marketdata)
+  - total
+  - page
+  - limit
 
-### /orders
+Considerations:
+  - no params returns the first page
+  - only accepts params name, ticker, page and limit, otherwise 400
+  - the search is a case-insensitive partial match, accents are not handled
+  - name and ticker combine with AND; empty strings are ignored
+  - ARS (type MONEDA) is excluded
+  - sorted by ticker
+  - when search criteria is not matched (or the page is past the end) returns data: [] with 200 [ADR-08]
+
+### /users/:id/orders
 Method: POST
+
+Params:
+  - path:
+    - id: user id
 
 Request body:
   - instrument_id
-  - user_id (better to retrieve from token?)
   - side
+  - type
   - size?
   - price?
-  - type
   - amount?
-  
+
 Response status:
-  - 201: success
-  - 404: asset (instrument_id) or user (user_id) not found
+  - 201: success (including orders persisted as REJECTED)
+  - 404: user (path id) not found
+  - 422: business rule violated, nothing persisted
   - 400: bad request
 
 Response body:
@@ -88,31 +112,39 @@ Response body:
   - price
   - type
   - status
+  - rejection_reason (null unless REJECTED)
   - datetime
 
 Considerations:
-  - body schema validation (size, amount and price > 0)
-  - instrument id exists
-  - user id exist
-  - if type == LIMIT then price is required
-  - amount and size cannot be sent together, when amount is sent it it should be the same as sending size=Math.floor(amount/price). not sending either returns a 400
-  - a request that results in a REJECTED order returns a 201
-  - a request with type MARKET and price returns a 400
-  - if side is CASH_IN or CASH_OUT instrument_id must be of ARS, otherwise 400
-  - if instrument_id is ARS side must be CASH_IN or CASH_OUT, otherwise 400
+  - 400 (DTO): types, required fields, format, price/amount/size > 0, at most 2 decimals, values within INT / NUMERIC(10,2) range, enums in exact uppercase
+  - 400: if type == LIMIT then price is required
+  - 400: a request with type MARKET and price
+  - 400: amount and size cannot be sent together; not sending either
+  - when amount is sent it is the same as sending size=Math.floor(amount/price); for MARKET the price is the last close
+  - 422: instrument_id does not exist
+  - 422: side CASH_IN/CASH_OUT with a non-ARS instrument, or ARS with side BUY/SELL
+  - 422: instrument without marketdata (MARKET and LIMIT)
+  - 422: amount results in 0 shares (MARKET and LIMIT)
+  - cash orders (CASH_IN/CASH_OUT) are MARKET only, price forced to 1; CASH_OUT above available is REJECTED
+  - MARKET orders are FILLED at the last close (latest date), the price is stored even if REJECTED
+  - LIMIT orders are NEW
+  - not enough cash (BUY) or shares (SELL) returns 201 with status REJECTED and rejection_reason
+  - check order: 400 -> 404 -> 422 -> balance check under the user row lock -> NEW/FILLED/REJECTED [ADR-04, ADR-12]
 
 ## Domain
-- orders with status NEW reserve available cash/shares but doesn't add/substract to an user's portfolio
+- orders with status NEW reserve available cash (BUY) or shares (SELL) but don't add/subtract to an user's total cash or positions
 - orders with CANCELLED or REJECTED status don't affect an user's portfolio
-- a /orders/:id/cancel enpoint is missing to cancel a user's order and restore the order cash (not part of the challenge but could add it at the end)
+- a POST /users/:id/orders/:order_id/cancel endpoint is missing to cancel a user's NEW order and restore the reservation (not part of the challenge but could add it at the end) [ADR-19]
 - i'm not supposed to simulate the market so orders with status NEW stay unchanged.
 - REJECTED orders don't affect an user's portfolio, the validation is ran before the asset amounts are updated
-- to calculate the available cash for an user i have to add the orders.size*orders.price when side is CASH_IN, SELL and substract all the orders.size*orders.price when side is CASH_OUT, BUY. when the order.status is NEW (for side BUY) or FILLED (for side SELL)
-- to calculate the total cash for an user i have to add the orders.size*orders.price when side is CASH_IN, SELL and substract all the orders.size*orders.price when side is CASH_OUT, BUY. when the order.status is FILLED
-- to calculate the yield for an user's asset i have to compare for all orders the value of that asset at the moment of placing the order (1) vs the current value of that asset (2).
+- total_cash = sum(size*price) of FILLED orders, adding CASH_IN and SELL, subtracting CASH_OUT and BUY
+- available = total_cash - sum(size*price) of NEW BUY orders
+- available shares of an asset = FILLED buys - FILLED sells - NEW sells; a SELL is validated against this
+- the yield of an asset is unrealized: (shares * last close) vs (shares * weighted average cost), where the average cost is a running average over the user's FILLED orders sorted by datetime, id (a BUY updates it, a SELL keeps it). Not a plain sum(cost)/sum(shares), which is wrong after sells.
+- last close = close of the marketdata row with the latest date
 
 
-Example:
+Example (hypothetical, it is NOT the seed data; order 11 here is an extra BUY used to show weighted cost across two prices. The seed's order 11 is a BMA SELL, see ADR-16):
 
 	Instrumento	Side	Size × Price	Type	Status	
 1	ARS	CASH_IN	1.000.000 × 1	MARKET	FILLED	
