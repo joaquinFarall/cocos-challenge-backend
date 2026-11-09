@@ -26,6 +26,7 @@ Status of every entry: **Accepted**, unless marked otherwise.
 18. [Testing strategy](#adr-18-testing-strategy)
 19. [Order cancellation](#adr-19-order-cancellation)
 20. [Documented but not implemented](#adr-20-documented-but-not-implemented)
+21. [Running migrations](#adr-21-running-migrations)
 
 ---
 
@@ -34,6 +35,7 @@ Status of every entry: **Accepted**, unless marked otherwise.
 **Context.** The spec says authentication is not needed. The draft had `POST /orders` with `user_id` in the body.
 
 **Options.**
+
 - `POST /orders` with `user_id` in the body.
 - `POST /users/:id/orders`.
 - Take the user from a token (adds auth, which was not requested).
@@ -55,6 +57,7 @@ Status of every entry: **Accepted**, unless marked otherwise.
 **Context.** The draft mixed 400 and 404 for errors depending on which entity was missing. Classifying by "needs a DB lookup" would make the codes depend on implementation.
 
 **Decision.** Classify by meaning:
+
 - **400** malformed request, caught by the DTO: wrong types, missing fields, bad format, more than 2 decimals, values outside INT / NUMERIC(10,2) range, enums not in exact uppercase, LIMIT without price, MARKET with price, `size` and `amount` both sent or neither, unknown query params, invalid `page`/`limit`.
 - **404** the user in the path does not exist.
 - **422** well-formed but violates a business rule; nothing is persisted: unknown instrument, ARS/side mismatch, instrument without marketdata (MARKET and LIMIT), `amount` that results in 0 shares (MARKET and LIMIT).
@@ -73,6 +76,7 @@ Status of every entry: **Accepted**, unless marked otherwise.
 **Context.** The spec models transfers as orders with side `CASH_IN` / `CASH_OUT` on the ARS instrument (type `MONEDA`).
 
 **Decision.**
+
 - `CASH_IN` / `CASH_OUT` require the ARS instrument; ARS requires a cash side. Mismatch → 422.
 - Type must be `MARKET`; price is forced to 1.
 - A `CASH_OUT` above available cash → 201 `REJECTED` (`INSUFFICIENT_FUNDS`).
@@ -84,6 +88,7 @@ Status of every entry: **Accepted**, unless marked otherwise.
 **Context.** Instruments 3 (PGR) and 10 (IRCP) have no `marketdata` rows. A MARKET order has no price to use, and the schema (ADR-15) requires `price NOT NULL` and `price > 0`.
 
 **Options.**
+
 - Persist as `REJECTED` — impossible without inventing a price.
 - 422, nothing persisted.
 
@@ -94,6 +99,7 @@ Status of every entry: **Accepted**, unless marked otherwise.
 ## ADR-07: JSON format and money representation
 
 **Decision.**
+
 - `snake_case` for requests and responses.
 - Money (`price`, `amount`, `available`, `total_cash`, `total_value`, `value`) and `yield` are decimal **strings** with at most 2 decimals (`"930.00"`, `"2.49"`), in requests and responses.
 - `size` and `shares` are JSON integers.
@@ -104,6 +110,7 @@ Status of every entry: **Accepted**, unless marked otherwise.
 ## ADR-08: Asset search and pagination
 
 **Decision.** `GET /assets` accepts only `name`, `ticker`, `page` (default 1) and `limit` (default 20, max 100). Any other param is 400.
+
 - Case-insensitive partial match (`ILIKE`), with `%` and `_` in user input escaped.
 - Accents are not handled (e.g. `Rio` does not match `Río`); documented.
 - Both filters combine with AND. Empty strings are ignored.
@@ -127,6 +134,7 @@ Status of every entry: **Accepted**, unless marked otherwise.
 ## ADR-10: Cash, reservations and total value
 
 **Decision.**
+
 - `total_cash` = Σ FILLED (`CASH_IN` + `SELL` − `CASH_OUT` − `BUY`) of `size × price`.
 - `available` = `total_cash` − Σ `size × price` of `NEW` `BUY` orders.
 - Available shares of an instrument = FILLED buys − FILLED sells − `NEW` sells. A `SELL` is checked against this number, so two LIMIT sells cannot reserve the same shares.
@@ -175,6 +183,7 @@ The average is a **running** average, computed by a pure domain function over th
 ## ADR-15: Schema changes
 
 **Decision.** Applied by migration:
+
 - `NOT NULL` on the essential columns of `orders` and `marketdata` (not `open`/`high`/`low`, which are null in the seed).
 - `CHECK` on `side`, `type`, `status`, and on `size > 0`, `price > 0`.
 - `UNIQUE (UPPER(ticker))` (case-insensitive; the seed has 66 distinct tickers).
@@ -206,6 +215,7 @@ The average is a **running** average, computed by a pure domain function over th
 ## ADR-18: Testing strategy
 
 **Decision.**
+
 - Functional test of order placement against real Postgres with Testcontainers (row locking cannot be tested with an in-memory fake). Requires Docker; documented in the README.
 - Unit tests for the pure domain logic: weighted-average cost, yield, available cash and shares, sizing from `amount`.
 - Postman collection with example calls.
@@ -226,3 +236,16 @@ The average is a **running** average, computed by a pure domain function over th
 - Idempotency keys (ADR-13).
 - Authentication and authorization.
 - Daily return from `close` / `previousClose` (note: BBAR on 2023-07-14 has `previousClose` 1047.166 vs the previous `close` 1062.20, and 3 decimals do not fit NUMERIC(10,2)).
+
+## ADR-21: Running migrations
+
+**Context.** ADR-15 requires that the schema changes only through migrations. Something has to decide when they run, and the app and the TypeORM CLI must agree on the connection and entities.
+
+**Options.**
+
+- `migrationsRun: true`, so the app applies pending migrations on boot.
+- Explicit CLI scripts only.
+
+**Decision.** Migrations run only through npm scripts (`migration:create`, `migration:generate`, `migration:run`, `migration:revert`). The app sets `migrationsRun: false` and `synchronize: false`. One function, `buildDataSourceOptions`, builds the options for both the Nest app and the CLI data source.
+
+**Consequences.** Starting the app never alters the schema; applying a migration is a deliberate step. A fresh database needs `npm run migration:run` after the seed is loaded. The app and the CLI cannot drift apart on entities or settings.
