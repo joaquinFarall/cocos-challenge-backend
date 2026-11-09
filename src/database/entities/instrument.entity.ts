@@ -1,7 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import type { InstrumentType } from './enums';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import type { InstrumentType } from '../../domain/enums';
 
 @Entity({ name: 'instruments' })
+@Index('instruments_ticker_upper_key', { synchronize: false })
 export class Instrument {
   @PrimaryGeneratedColumn()
   id: number;

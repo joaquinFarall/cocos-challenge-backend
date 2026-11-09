@@ -5,6 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { DecimalTransformer } from '../decimal.transformer';
 import { Instrument } from './instrument.entity';
@@ -13,38 +14,37 @@ const numeric = {
   type: 'numeric',
   precision: 10,
   scale: 2,
-  nullable: true,
   transformer: DecimalTransformer,
 } as const;
 
 @Entity({ name: 'marketdata' })
+@Unique('marketdata_instrumentid_date_key', ['instrumentId', 'date'])
 export class MarketData {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'instrumentid', type: 'int', nullable: true })
-  instrumentId: number | null;
+  @Column({ name: 'instrumentid', type: 'int' })
+  instrumentId: number;
 
-  @ManyToOne(() => Instrument)
+  @ManyToOne(() => Instrument, { nullable: false })
   @JoinColumn({ name: 'instrumentid' })
   instrument?: Instrument;
 
-  @Column(numeric)
+  @Column({ ...numeric, nullable: true })
   high: Decimal | null;
 
-  @Column(numeric)
+  @Column({ ...numeric, nullable: true })
   low: Decimal | null;
 
-  @Column(numeric)
+  @Column({ ...numeric, nullable: true })
   open: Decimal | null;
 
   @Column(numeric)
-  close: Decimal | null;
+  close: Decimal;
 
   @Column({ ...numeric, name: 'previousclose' })
-  previousClose: Decimal | null;
+  previousClose: Decimal;
 
-  /** DATE as YYYY-MM-DD string, so there are no timezone shifts. */
-  @Column({ type: 'date', nullable: true })
-  date: string | null;
+  @Column({ type: 'date' })
+  date: string;
 }
