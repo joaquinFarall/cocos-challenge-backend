@@ -8,7 +8,9 @@ export async function createTestApp(): Promise<INestApplication> {
     imports: [AppModule],
   }).compile();
   const app = moduleRef.createNestApplication();
-  await app.init();
+  // Listening once (ephemeral port) lets supertest reuse one server, which
+  // matters for the parallel requests of the concurrency tests.
+  await app.listen(0);
   return app;
 }
 
