@@ -27,6 +27,7 @@ Status of every entry: **Accepted**, unless marked otherwise.
 19. [Order cancellation](#adr-19-order-cancellation)
 20. [Documented but not implemented](#adr-20-documented-but-not-implemented)
 21. [Running migrations](#adr-21-running-migrations)
+22. [Structured logging](#adr-22-structured-logging)
 
 ---
 
@@ -251,3 +252,24 @@ The average is a **running** average, computed by a pure domain function over th
 **Addendum.** On boot the app runs a read-only check and fails fast if migrations are pending, with a message pointing to `npm run migration:run` and warning that it modifies the database `DATABASE_URL` points to. The check uses `MigrationExecutor.getPendingMigrations()`, not `DataSource.showMigrations()`, which creates the migrations table. `npm run db:up` runs the migrations, but only against the local Docker database (its URL is pinned in the script).
 
 **Consequences.** Starting the app never alters the schema; applying a migration is a deliberate step, and a stale schema cannot serve requests. A fresh database needs `npm run migration:run` after the seed is loaded (`db:up` does it for the local one). The app and the CLI cannot drift apart on entities or settings.
+
+## ADR-22: Structured logging
+
+**Context.** Nest's default logger prints unstructured text. We want production-style logs: one line per request with a correlation id, JSON that a log platform can parse, readable output in development, silence in tests, and no personal data.
+
+**Options.**
+
+- `nestjs-pino` (pino + `pino-http`).
+- `nest-winston`.
+- Nest's `ConsoleLogger({ json: true })` plus a hand-written interceptor.
+
+**Decision.** `nestjs-pino`, with `pino-pretty` as a dev dependency.
+
+- **One line per request** from `pino-http`, so it also covers requests that fail before reaching a route (404 on unknown paths, 400 from pipes). Fields: `req.id`, `req.method`, `req.path`, `res.statusCode`, `responseTime` (ms). Level is `info` below 400, `warn` for 4xx, `error` for 5xx. `GET /health` is not logged.
+- **Request id.** Taken from `X-Request-Id` when it is a single value matching `^[A-Za-z0-9._:-]{1,128}$`; otherwise a UUID is generated. It is always returned in the `X-Request-Id` response header and attached to every log line written during the request (`reqId`). Invalid values are replaced, not rejected, so a bad header never fails a request.
+- **Environments.** `NODE_ENV=test`: level `silent`. `development`: `pino-pretty`, single line. Otherwise raw JSON to stdout. `LOG_LEVEL` (default `info`) sets the level outside tests.
+- **Never logged:** request bodies, headers, query strings and remote addresses. The `req` serializer outputs only `id`, `method` and `path`, with `redact` as a second barrier. Log payloads carry ids, enums and counts, never emails, names or account numbers.
+- **Business events.** Services use Nest's `Logger` (not pino directly) with an object payload `{ event: '<domain>.<action>', ...ids }`, for example `order.placed` with `orderId`, `userId`, `instrumentId`, `side`, `type`, `status` and `rejectionReason`. A rejected order is a status on that event, not an error.
+- **Errors are logged once.** An unexpected error is not caught, logged and rethrown. It carries its own context and propagates to Nest's exception handler, which logs it once with the stack and `reqId`. `LedgerInconsistencyError` (ADR-11) now has a `context` of `userId`, `instrumentId` and, when known, `orderId`. The request line for the 500 carries only the response and duration, not a second copy of the error.
+
+**Consequences.** Every request is traceable by id, and a client can quote the `X-Request-Id` it received. Tests stay quiet, and logging behavior is covered by tests that capture the output. Pino's JSON is the contract with the log platform; changing the library later would not affect services, which only use Nest's `Logger`. Because request logging is middleware-level, it adds no code to controllers.
