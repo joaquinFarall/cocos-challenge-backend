@@ -55,4 +55,4 @@ npm run migration:revert
 - `npm run build`: build
 - `npm run lint`: oxlint
 - `npm test`: unit tests
-- `npm run test:e2e`: functional tests (need Docker for Testcontainers)
+- `npm run test:e2e`: functional tests. They start a throwaway Postgres 17 with Testcontainers (needs Docker), load `db/database.sql`, run the migrations and drop the container at the end. They never use `DATABASE_URL` from `.env`.
