@@ -1,5 +1,4 @@
 import { D, toMoneyString } from './decimal';
-import type { OrderSide, OrderStatus } from './enums';
 import {
   availableCash,
   availableShares,
@@ -8,13 +7,15 @@ import {
   LedgerInconsistencyError,
   positionYield,
   totalCash,
-  type LedgerOrder,
 } from './portfolio';
-
-const ARS = 66;
-const PAMP = 47;
-const BMA = 31;
-const METR = 54;
+import {
+  ARS,
+  BMA,
+  ledgerOrder,
+  METR,
+  PAMP,
+  seedLedger,
+} from './testing/ledger-order.fixture';
 
 function catchError(fn: () => unknown): unknown {
   try {
@@ -25,28 +26,6 @@ function catchError(fn: () => unknown): unknown {
   throw new Error('Expected the function to throw');
 }
 
-let nextId = 1;
-function order(
-  side: OrderSide,
-  instrumentId: number,
-  size: number,
-  price: string,
-  status: OrderStatus = 'FILLED',
-  datetime = '2023-07-12T12:00:00Z',
-  id = nextId++,
-): LedgerOrder {
-  return {
-    id,
-    userId: 1,
-    instrumentId,
-    side,
-    status,
-    size,
-    price: new D(price),
-    datetime: new Date(datetime),
-  };
-}
-
 describe('totalCash', () => {
   it('is 0 for an empty ledger', () => {
     expect(totalCash([]).toFixed(2)).toBe('0.00');
@@ -54,10 +33,10 @@ describe('totalCash', () => {
 
   it('adds CASH_IN and SELL, subtracts CASH_OUT and BUY (FILLED only)', () => {
     const orders = [
-      order('CASH_IN', ARS, 1000, '1'),
-      order('BUY', PAMP, 10, '50'),
-      order('SELL', PAMP, 4, '60'),
-      order('CASH_OUT', ARS, 100, '1'),
+      ledgerOrder('CASH_IN', ARS, 1000, '1'),
+      ledgerOrder('BUY', PAMP, 10, '50'),
+      ledgerOrder('SELL', PAMP, 4, '60'),
+      ledgerOrder('CASH_OUT', ARS, 100, '1'),
     ];
     // 1000 - 500 + 240 - 100
     expect(totalCash(orders).toFixed(2)).toBe('640.00');
@@ -65,11 +44,11 @@ describe('totalCash', () => {
 
   it('ignores NEW, CANCELLED and REJECTED orders', () => {
     const orders = [
-      order('CASH_IN', ARS, 1000, '1'),
-      order('BUY', PAMP, 10, '50', 'NEW'),
-      order('BUY', PAMP, 10, '50', 'CANCELLED'),
-      order('CASH_OUT', ARS, 5000, '1', 'REJECTED'),
-      order('SELL', PAMP, 10, '50', 'NEW'),
+      ledgerOrder('CASH_IN', ARS, 1000, '1'),
+      ledgerOrder('BUY', PAMP, 10, '50', 'NEW'),
+      ledgerOrder('BUY', PAMP, 10, '50', 'CANCELLED'),
+      ledgerOrder('CASH_OUT', ARS, 5000, '1', 'REJECTED'),
+      ledgerOrder('SELL', PAMP, 10, '50', 'NEW'),
     ];
     expect(totalCash(orders).toFixed(2)).toBe('1000.00');
   });
@@ -78,11 +57,11 @@ describe('totalCash', () => {
 describe('availableCash', () => {
   it('subtracts the cash reserved by NEW BUY orders only', () => {
     const orders = [
-      order('CASH_IN', ARS, 1000, '1'),
-      order('BUY', PAMP, 2, '100', 'NEW'),
-      order('SELL', PAMP, 5, '100', 'NEW'),
-      order('BUY', PAMP, 9, '100', 'CANCELLED'),
-      order('BUY', PAMP, 9, '100', 'REJECTED'),
+      ledgerOrder('CASH_IN', ARS, 1000, '1'),
+      ledgerOrder('BUY', PAMP, 2, '100', 'NEW'),
+      ledgerOrder('SELL', PAMP, 5, '100', 'NEW'),
+      ledgerOrder('BUY', PAMP, 9, '100', 'CANCELLED'),
+      ledgerOrder('BUY', PAMP, 9, '100', 'REJECTED'),
     ];
     expect(availableCash(orders).toFixed(2)).toBe('800.00');
   });
@@ -95,9 +74,9 @@ describe('computePositions', () => {
 
   it('keeps the running average across sells (buy 10@100, sell 5, buy 5@200)', () => {
     const positions = computePositions([
-      order('BUY', PAMP, 10, '100', 'FILLED', '2023-07-12T10:00:00Z'),
-      order('SELL', PAMP, 5, '120', 'FILLED', '2023-07-12T11:00:00Z'),
-      order('BUY', PAMP, 5, '200', 'FILLED', '2023-07-12T12:00:00Z'),
+      ledgerOrder('BUY', PAMP, 10, '100', 'FILLED', '2023-07-12T10:00:00Z'),
+      ledgerOrder('SELL', PAMP, 5, '120', 'FILLED', '2023-07-12T11:00:00Z'),
+      ledgerOrder('BUY', PAMP, 5, '200', 'FILLED', '2023-07-12T12:00:00Z'),
     ]);
     expect(positions).toHaveLength(1);
     expect(positions[0].shares).toBe(10);
@@ -106,14 +85,14 @@ describe('computePositions', () => {
 
   it('hides positions sold down to 0', () => {
     const positions = computePositions([
-      order('BUY', PAMP, 10, '100', 'FILLED', '2023-07-12T10:00:00Z'),
-      order('SELL', PAMP, 10, '110', 'FILLED', '2023-07-12T11:00:00Z'),
+      ledgerOrder('BUY', PAMP, 10, '100', 'FILLED', '2023-07-12T10:00:00Z'),
+      ledgerOrder('SELL', PAMP, 10, '110', 'FILLED', '2023-07-12T11:00:00Z'),
     ]);
     expect(positions).toEqual([]);
   });
 
   it('sorts by datetime, then id, regardless of input order', () => {
-    const buy = order(
+    const buy = ledgerOrder(
       'BUY',
       PAMP,
       10,
@@ -122,7 +101,7 @@ describe('computePositions', () => {
       '2023-07-12T10:00:00Z',
       2,
     );
-    const sell = order(
+    const sell = ledgerOrder(
       'SELL',
       PAMP,
       10,
@@ -131,7 +110,7 @@ describe('computePositions', () => {
       '2023-07-12T10:00:00Z',
       3,
     );
-    const later = order(
+    const later = ledgerOrder(
       'BUY',
       PAMP,
       1,
@@ -147,10 +126,10 @@ describe('computePositions', () => {
 
   it('ignores cash orders and non-FILLED orders', () => {
     const positions = computePositions([
-      order('CASH_IN', ARS, 1000, '1'),
-      order('BUY', PAMP, 10, '100', 'NEW'),
-      order('BUY', PAMP, 10, '100', 'CANCELLED'),
-      order('SELL', PAMP, 10, '100', 'REJECTED'),
+      ledgerOrder('CASH_IN', ARS, 1000, '1'),
+      ledgerOrder('BUY', PAMP, 10, '100', 'NEW'),
+      ledgerOrder('BUY', PAMP, 10, '100', 'CANCELLED'),
+      ledgerOrder('SELL', PAMP, 10, '100', 'REJECTED'),
     ]);
     expect(positions).toEqual([]);
   });
@@ -158,8 +137,24 @@ describe('computePositions', () => {
   it('throws when a FILLED SELL takes shares below 0', () => {
     const thrown = catchError(() =>
       computePositions([
-        order('BUY', BMA, 20, '1540', 'FILLED', '2023-07-13T12:51:20Z', 9),
-        order('SELL', BMA, 30, '1530', 'FILLED', '2023-07-13T15:13:20Z', 11),
+        ledgerOrder(
+          'BUY',
+          BMA,
+          20,
+          '1540',
+          'FILLED',
+          '2023-07-13T12:51:20Z',
+          9,
+        ),
+        ledgerOrder(
+          'SELL',
+          BMA,
+          30,
+          '1530',
+          'FILLED',
+          '2023-07-13T15:13:20Z',
+          11,
+        ),
       ]),
     );
     expect(thrown).toBeInstanceOf(LedgerInconsistencyError);
@@ -201,7 +196,7 @@ describe('buildPortfolio', () => {
   });
 
   it('throws when a held instrument has no close', () => {
-    const orders = [order('BUY', PAMP, 1, '100')];
+    const orders = [ledgerOrder('BUY', PAMP, 1, '100')];
     const thrown = catchError(() =>
       buildPortfolio(orders, computePositions(orders), new Map()),
     );
@@ -213,19 +208,6 @@ describe('buildPortfolio', () => {
   });
 
   describe('seed scenario (user 1, after the ADR-16 correction)', () => {
-    const seed = (bmaSellStatus: OrderStatus): LedgerOrder[] => [
-      order('CASH_IN', ARS, 1000000, '1', 'FILLED', '2023-07-12T12:11:20Z', 1),
-      order('BUY', PAMP, 50, '930', 'FILLED', '2023-07-12T12:31:20Z', 2),
-      order('BUY', PAMP, 50, '920', 'CANCELLED', '2023-07-12T14:21:20Z', 3),
-      order('SELL', PAMP, 10, '940', 'FILLED', '2023-07-12T14:51:20Z', 4),
-      order('BUY', 45, 50, '710', 'NEW', '2023-07-12T15:14:20Z', 5),
-      order('SELL', PAMP, 100, '950', 'REJECTED', '2023-07-12T16:11:20Z', 6),
-      order('BUY', BMA, 60, '1500', 'NEW', '2023-07-13T11:13:20Z', 7),
-      order('CASH_OUT', ARS, 100000, '1', 'FILLED', '2023-07-13T12:31:20Z', 8),
-      order('BUY', BMA, 20, '1540', 'FILLED', '2023-07-13T12:51:20Z', 9),
-      order('BUY', METR, 500, '250', 'FILLED', '2023-07-13T14:11:20Z', 10),
-      order('SELL', BMA, 30, '1530', bmaSellStatus, '2023-07-13T15:13:20Z', 11),
-    ];
     // Latest seed closes (2023-07-14).
     const closes = new Map<number, D>([
       [PAMP, new D('925.85')],
@@ -234,7 +216,7 @@ describe('buildPortfolio', () => {
     ]);
 
     it('matches the hardcoded cash, positions, values and yields', () => {
-      const orders = seed('REJECTED');
+      const orders = seedLedger('REJECTED');
       const result = buildPortfolio(orders, computePositions(orders), closes);
 
       expect(toMoneyString(result.totalCash)).toBe('707100.00');
@@ -264,7 +246,7 @@ describe('buildPortfolio', () => {
     });
 
     it('throws on the uncorrected seed (BMA SELL still FILLED)', () => {
-      expect(() => computePositions(seed('FILLED'))).toThrow(
+      expect(() => computePositions(seedLedger('FILLED'))).toThrow(
         LedgerInconsistencyError,
       );
     });
@@ -274,13 +256,13 @@ describe('buildPortfolio', () => {
 describe('availableShares', () => {
   it('is FILLED buys − FILLED sells − NEW sells of that instrument', () => {
     const orders = [
-      order('BUY', PAMP, 50, '100'),
-      order('SELL', PAMP, 10, '100'),
-      order('SELL', PAMP, 15, '100', 'NEW'),
-      order('BUY', PAMP, 99, '100', 'NEW'),
-      order('BUY', PAMP, 99, '100', 'CANCELLED'),
-      order('SELL', PAMP, 99, '100', 'REJECTED'),
-      order('BUY', BMA, 7, '100'),
+      ledgerOrder('BUY', PAMP, 50, '100'),
+      ledgerOrder('SELL', PAMP, 10, '100'),
+      ledgerOrder('SELL', PAMP, 15, '100', 'NEW'),
+      ledgerOrder('BUY', PAMP, 99, '100', 'NEW'),
+      ledgerOrder('BUY', PAMP, 99, '100', 'CANCELLED'),
+      ledgerOrder('SELL', PAMP, 99, '100', 'REJECTED'),
+      ledgerOrder('BUY', BMA, 7, '100'),
     ];
     expect(availableShares(orders, PAMP)).toBe(25);
     expect(availableShares(orders, BMA)).toBe(7);
@@ -288,7 +270,7 @@ describe('availableShares', () => {
   });
 
   it('does not throw on an inconsistent ledger', () => {
-    const orders = [order('SELL', PAMP, 5, '100')];
+    const orders = [ledgerOrder('SELL', PAMP, 5, '100')];
     expect(availableShares(orders, PAMP)).toBe(-5);
   });
 });
