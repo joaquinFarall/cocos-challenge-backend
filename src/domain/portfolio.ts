@@ -74,6 +74,30 @@ export function availableCash(orders: readonly LedgerOrder[]): D {
 }
 
 /**
+ * Shares of an instrument a SELL can still use: FILLED buys − FILLED sells −
+ * NEW sells (ADR-10). Unlike `computePositions` it never throws, so an order
+ * check does not depend on the ledger being consistent.
+ */
+export function availableShares(
+  orders: readonly LedgerOrder[],
+  instrumentId: number,
+): number {
+  let shares = 0;
+  for (const order of orders) {
+    if (order.instrumentId !== instrumentId) continue;
+    if (order.status === 'FILLED' && order.side === 'BUY') {
+      shares += order.size;
+    } else if (
+      order.side === 'SELL' &&
+      (order.status === 'FILLED' || order.status === 'NEW')
+    ) {
+      shares -= order.size;
+    }
+  }
+  return shares;
+}
+
+/**
  * Held shares with a running weighted-average cost over FILLED BUY/SELL orders
  * sorted by `datetime, id`. A BUY updates the average; a SELL keeps it
  * (ADR-11). Positions with 0 shares are omitted.

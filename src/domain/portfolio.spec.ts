@@ -2,6 +2,7 @@ import { D, toMoneyString } from './decimal';
 import type { OrderSide, OrderStatus } from './enums';
 import {
   availableCash,
+  availableShares,
   buildPortfolio,
   computePositions,
   LedgerInconsistencyError,
@@ -267,5 +268,27 @@ describe('buildPortfolio', () => {
         LedgerInconsistencyError,
       );
     });
+  });
+});
+
+describe('availableShares', () => {
+  it('is FILLED buys − FILLED sells − NEW sells of that instrument', () => {
+    const orders = [
+      order('BUY', PAMP, 50, '100'),
+      order('SELL', PAMP, 10, '100'),
+      order('SELL', PAMP, 15, '100', 'NEW'),
+      order('BUY', PAMP, 99, '100', 'NEW'),
+      order('BUY', PAMP, 99, '100', 'CANCELLED'),
+      order('SELL', PAMP, 99, '100', 'REJECTED'),
+      order('BUY', BMA, 7, '100'),
+    ];
+    expect(availableShares(orders, PAMP)).toBe(25);
+    expect(availableShares(orders, BMA)).toBe(7);
+    expect(availableShares(orders, METR)).toBe(0);
+  });
+
+  it('does not throw on an inconsistent ledger', () => {
+    const orders = [order('SELL', PAMP, 5, '100')];
+    expect(availableShares(orders, PAMP)).toBe(-5);
   });
 });
