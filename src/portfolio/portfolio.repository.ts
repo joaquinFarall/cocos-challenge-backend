@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { D } from '../domain/decimal';
 import { Order } from '../database/entities/order.entity';
+import { findRelevantOrders } from '../database/relevant-orders.query';
 import { User } from '../database/entities/user.entity';
 
 export interface InstrumentQuote {
@@ -33,12 +34,8 @@ export class PortfolioRepository {
     });
   }
 
-  /** FILLED and NEW orders: the only ones that affect cash or positions. */
   findRelevantOrders(userId: number): Promise<Order[]> {
-    return this.orders.find({
-      where: { userId, status: In(['FILLED', 'NEW']) },
-      order: { datetime: 'ASC', id: 'ASC' },
-    });
+    return findRelevantOrders(this.orders.manager, userId);
   }
 
   /** Latest close and instrument info for all ids in a single query. */
