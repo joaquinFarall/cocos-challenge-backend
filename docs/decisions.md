@@ -28,6 +28,7 @@ Status of every entry: **Accepted**, unless marked otherwise.
 20. [Documented but not implemented](#adr-20-documented-but-not-implemented)
 21. [Running migrations](#adr-21-running-migrations)
 22. [Structured logging](#adr-22-structured-logging)
+23. [Error response format](#adr-23-error-response-format)
 
 ---
 
@@ -59,9 +60,9 @@ Status of every entry: **Accepted**, unless marked otherwise.
 
 **Decision.** Classify by meaning:
 
-- **400** malformed request, caught by the DTO: wrong types, missing fields, bad format, more than 2 decimals, values outside INT / NUMERIC(10,2) range, enums not in exact uppercase, LIMIT without price, MARKET with price, `size` and `amount` both sent or neither, unknown query params, invalid `page`/`limit`.
+- **400** malformed request, caught by the DTO: wrong types, missing fields, bad format, more than 2 decimals, values outside INT / NUMERIC(10,2) range, enums not in exact uppercase, unknown body properties, LIMIT without price, MARKET with price, a cash side (`CASH_IN` / `CASH_OUT`) with `LIMIT`, `size` and `amount` both sent or neither, unknown query params, invalid `page`/`limit`.
 - **404** the user in the path does not exist.
-- **422** well-formed but violates a business rule; nothing is persisted: unknown instrument, ARS/side mismatch, instrument without marketdata (MARKET and LIMIT), `amount` that results in 0 shares (MARKET and LIMIT).
+- **422** well-formed but violates a business rule; nothing is persisted: unknown instrument, ARS/side mismatch, instrument without marketdata (MARKET and LIMIT), `amount` that results in 0 shares (MARKET and LIMIT), `amount` that results in a size above 2147483647.
 - **201 with status `REJECTED`** a valid order without enough cash or shares; it is persisted.
 
 **Consequences.** Clients can tell "fix your request" (400) from "request makes no business sense" (422) from "valid but refused by the market" (201 REJECTED). Enums are case-sensitive (`buy` is a 400) so the API never silently changes what the client sent, and the values match the DB CHECKs exactly.
@@ -79,7 +80,7 @@ Status of every entry: **Accepted**, unless marked otherwise.
 **Decision.**
 
 - `CASH_IN` / `CASH_OUT` require the ARS instrument; ARS requires a cash side. Mismatch → 422.
-- Type must be `MARKET`; price is forced to 1.
+- Type must be `MARKET` (`LIMIT` is a 400 from the DTO, a pure body check); price is forced to 1.
 - A `CASH_OUT` above available cash → 201 `REJECTED` (`INSUFFICIENT_FUNDS`).
 
 **Consequences.** Cash is stored in `size` as whole pesos (no centavos). This is a limitation of the provided schema (see ADR-20).
@@ -270,6 +271,28 @@ The average is a **running** average, computed by a pure domain function over th
 - **Environments.** `NODE_ENV=test`: level `silent`. `development`: `pino-pretty`, single line. Otherwise raw JSON to stdout. `LOG_LEVEL` (default `info`) sets the level outside tests.
 - **Never logged:** request bodies, headers, query strings and remote addresses. The `req` serializer outputs only `id`, `method` and `path`, with `redact` as a second barrier. Log payloads carry ids, enums and counts, never emails, names or account numbers.
 - **Business events.** Services use Nest's `Logger` (not pino directly) with an object payload `{ event: '<domain>.<action>', ...ids }`, for example `order.placed` with `orderId`, `userId`, `instrumentId`, `side`, `type`, `status` and `rejectionReason`. A rejected order is a status on that event, not an error.
-- **Errors are logged once.** An unexpected error is not caught, logged and rethrown. It carries its own context and propagates to Nest's exception handler, which logs it once with the stack and `reqId`. `LedgerInconsistencyError` (ADR-11) now has a `context` of `userId`, `instrumentId` and, when known, `orderId`. The request line for the 500 carries only the response and duration, not a second copy of the error.
+- **Errors are logged once.** An unexpected error is not caught, logged and rethrown. It carries its own context and propagates to the global exception filter (ADR-23), which logs it once with the stack and `reqId`. `LedgerInconsistencyError` (ADR-11) now has a `context` of `userId`, `instrumentId` and, when known, `orderId`. The request line for the 500 carries only the response and duration, not a second copy of the error.
 
 **Consequences.** Every request is traceable by id, and a client can quote the `X-Request-Id` it received. Tests stay quiet, and logging behavior is covered by tests that capture the output. Pino's JSON is the contract with the log platform; changing the library later would not affect services, which only use Nest's `Logger`. Because request logging is middleware-level, it adds no code to controllers.
+
+## ADR-23: Error response format
+
+**Context.** Nest's default error body is `{ statusCode, message, error }`, where `message` can be a string or an array, in camelCase, with no machine-readable code. ADR-07 requires `snake_case`, and clients need to tell apart the different 422 rules without parsing text.
+
+**Options.**
+
+- Nest's default format.
+- One uniform shape with a code, produced by a global exception filter.
+
+**Decision.** One global `@Catch()` filter answers every error: validation, 404 on unknown routes, domain errors and unexpected failures.
+
+```json
+{ "status_code": 422, "error": "NO_MARKET_DATA", "message": "Instrument 3 has no market data" }
+```
+
+- `error` is an UPPER_SNAKE code. By default it is the HTTP status name (`BAD_REQUEST`, `NOT_FOUND`). Domain errors carry a specific code: `USER_NOT_FOUND` (404) and, for 422, `INSTRUMENT_NOT_FOUND`, `SIDE_INSTRUMENT_MISMATCH`, `NO_MARKET_DATA`, `ZERO_SHARES`, `SIZE_OUT_OF_RANGE`.
+- Validation errors (400) add `details: [{ "field", "message" }]`, one entry per violated rule, so a client sees every problem at once. A body that is not a JSON object is a 400 without details.
+- A 500 is always `{ "status_code": 500, "error": "INTERNAL_SERVER_ERROR", "message": "Internal server error" }`. The real message never reaches the client.
+- Expected errors (every status below 500) are not logged as failures. The filter logs an unexpected error once, with its stack, its `context` and the `reqId` (ADR-22). It does not catch, log and rethrow.
+
+**Consequences.** Clients get one shape and a stable code to branch on. Codes are part of the API contract, so renaming one is a breaking change. Because the pipe and the filter are registered as providers in `AppModule`, the e2e tests exercise the same behavior as production.

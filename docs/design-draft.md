@@ -14,6 +14,7 @@ Common rules:
   - money and yield are decimal strings with at most 2 decimals; size/shares are integers [ADR-07]
   - path id matches ^[1-9]\d*$ and is <= 2147483647, otherwise 400 [ADR-02]
   - 400 malformed request (DTO), 404 user not found, 422 business rule violated (nothing persisted), 201 + REJECTED valid order without enough cash/shares [ADR-03]
+  - every error is `{ status_code, error, message, details? }` with an UPPER_SNAKE `error` code [ADR-23]
 
 ### /users/:id/portfolio
 Method: GET
@@ -116,7 +117,8 @@ Response body:
   - datetime
 
 Considerations:
-  - 400 (DTO): types, required fields, format, price/amount/size > 0, at most 2 decimals, values within INT / NUMERIC(10,2) range, enums in exact uppercase
+  - 400 (DTO): types, required fields, format, price/amount/size > 0, at most 2 decimals, values within INT / NUMERIC(10,2) range, enums in exact uppercase, unknown body properties
+  - 400: a cash side (CASH_IN/CASH_OUT) with type LIMIT
   - 400: if type == LIMIT then price is required
   - 400: a request with type MARKET and price
   - 400: amount and size cannot be sent together; not sending either
@@ -125,6 +127,7 @@ Considerations:
   - 422: side CASH_IN/CASH_OUT with a non-ARS instrument, or ARS with side BUY/SELL
   - 422: instrument without marketdata (MARKET and LIMIT)
   - 422: amount results in 0 shares (MARKET and LIMIT)
+  - 422: amount results in a size above 2147483647
   - cash orders (CASH_IN/CASH_OUT) are MARKET only, price forced to 1; CASH_OUT above available is REJECTED
   - MARKET orders are FILLED at the last close (latest date), the price is stored even if REJECTED
   - LIMIT orders are NEW
