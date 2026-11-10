@@ -1,0 +1,2776 @@
+{
+  "info": {
+    "name": "Cocos Challenge API",
+    "description": "Example calls for every endpoint, with a saved example per case: success, REJECTED (201), 400, 404 and 422.\n\nSet the `baseUrl` collection variable if the API does not run on http://localhost:8080.\n\nOrder examples change state (a user's cash and positions). To restore the seed data run `npm run db:reset`. Error codes and status semantics: docs/decisions.md (ADR-03, ADR-23).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health check → 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Health check → 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "health"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status\": \"ok\",\n  \"info\": {\n    \"database\": {\n      \"responseTime\": 7,\n      \"status\": \"up\"\n    }\n  },\n  \"error\": {},\n  \"details\": {\n    \"database\": {\n      \"responseTime\": 7,\n      \"status\": \"up\"\n    }\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Portfolio",
+      "item": [
+        {
+          "name": "User with positions → 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/portfolio",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "portfolio"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "User with positions → 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/portfolio",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "portfolio"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"account_number\": \"10001\",\n  \"available\": \"581600.00\",\n  \"total_cash\": \"707100.00\",\n  \"total_value\": \"888940.00\",\n  \"assets\": [\n    {\n      \"instrument_id\": 31,\n      \"ticker\": \"BMA\",\n      \"name\": \"Banco Macro S.A.\",\n      \"shares\": 20,\n      \"value\": \"30056.00\",\n      \"yield\": \"-2.42\"\n    },\n    {\n      \"instrument_id\": 54,\n      \"ticker\": \"METR\",\n      \"name\": \"MetroGAS S.A.\",\n      \"shares\": 500,\n      \"value\": \"114750.00\",\n      \"yield\": \"-8.20\"\n    },\n    {\n      \"instrument_id\": 47,\n      \"ticker\": \"PAMP\",\n      \"name\": \"Pampa Holding S.A.\",\n      \"shares\": 40,\n      \"value\": \"37034.00\",\n      \"yield\": \"-0.45\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "User without orders → 200 (zeros)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/2/portfolio",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "2",
+                "portfolio"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "User without orders → 200 (zeros)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/users/2/portfolio",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "2",
+                    "portfolio"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"account_number\": \"10002\",\n  \"available\": \"0.00\",\n  \"total_cash\": \"0.00\",\n  \"total_value\": \"0.00\",\n  \"assets\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "Id is not a number → 400",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/abc/portfolio",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "abc",
+                "portfolio"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Id is not a number → 400",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/users/abc/portfolio",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "abc",
+                    "portfolio"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 400,\n  \"error\": \"BAD_REQUEST\",\n  \"message\": \"id must be a positive integer up to 2147483647\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Id is zero → 400",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/0/portfolio",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "0",
+                "portfolio"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Id is zero → 400",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/users/0/portfolio",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "0",
+                    "portfolio"
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 400,\n  \"error\": \"BAD_REQUEST\",\n  \"message\": \"id must be a positive integer up to 2147483647\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Unknown user → 404",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/999/portfolio",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "999",
+                "portfolio"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Unknown user → 404",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/users/999/portfolio",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "999",
+                    "portfolio"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 404,\n  \"error\": \"USER_NOT_FOUND\",\n  \"message\": \"User 999 not found\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Assets",
+      "item": [
+        {
+          "name": "No params (first page) → 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/assets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "assets"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "No params (first page) → 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/assets",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "assets"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 26,\n      \"ticker\": \"AGRO\",\n      \"name\": \"Agrometal\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"138.00\",\n      \"daily_return\": \"0.00\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 61,\n      \"ticker\": \"ALUA\",\n      \"name\": \"Aluar Aluminio Argentino S.A.I.C.\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"410.00\",\n      \"daily_return\": \"-0.49\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 27,\n      \"ticker\": \"AUSO\",\n      \"name\": \"Autopistas del Sol\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"624.00\",\n      \"daily_return\": \"0.16\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 22,\n      \"ticker\": \"BBAR\",\n      \"name\": \"Banco Frances\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"1038.10\",\n      \"daily_return\": \"-0.87\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 28,\n      \"ticker\": \"BHIP\",\n      \"name\": \"Banco Hipotecario S.A.\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"33.40\",\n      \"daily_return\": \"-3.47\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 31,\n      \"ticker\": \"BMA\",\n      \"name\": \"Banco Macro S.A.\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"1502.80\",\n      \"daily_return\": \"-1.15\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 29,\n      \"ticker\": \"BOLT\",\n      \"name\": \"Boldt S.A.\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"8.93\",\n      \"daily_return\": \"1.59\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 19,\n      \"ticker\": \"BPAT\",\n      \"name\": \"Banco Patagonia\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"279.00\",\n      \"daily_return\": \"-3.46\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 65,\n      \"ticker\": \"BYMA\",\n      \"name\": \"Bolsas y Mercados Argentinos S.A.\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"369.50\",\n      \"daily_return\": \"2.07\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 38,\n      \"ticker\": \"CADO\",\n      \"name\": \"Carlos Casado\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"166.50\",\n      \"daily_return\": \"1.99\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 2,\n      \"ticker\": \"CAPX\",\n      \"name\": \"Capex S.A.\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"1865.00\",\n      \"daily_return\": \"-2.76\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 30,\n      \"ticker\": \"CARC\",\n      \"name\": \"Carboclor S.A.\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"7.00\",\n      \"daily_return\": \"3.70\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 25,\n      \"ticker\": \"CECO2\",\n      \"name\": \"Central Costanera\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"195.00\",\n      \"daily_return\": \"1.17\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 24,\n      \"ticker\": \"CELU\",\n      \"name\": \"Celulosa Argentina S.A.\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"322.00\",\n      \"daily_return\": \"3.87\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 60,\n      \"ticker\": \"CEPU\",\n      \"name\": \"Central Puerto\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"363.00\",\n      \"daily_return\": \"-0.49\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 37,\n      \"ticker\": \"CGPA2\",\n      \"name\": \"Camuzzi Gas del Sur\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"400.50\",\n      \"daily_return\": \"0.00\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 59,\n      \"ticker\": \"COME\",\n      \"name\": \"Sociedad Comercial Del Plata\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"42.75\",\n      \"daily_return\": \"-0.35\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 32,\n      \"ticker\": \"CRES\",\n      \"name\": \"Cresud S.A.\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"424.25\",\n      \"daily_return\": \"-1.21\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 62,\n      \"ticker\": \"CTIO\",\n      \"name\": \"Consultatio S.A.\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"520.00\",\n      \"daily_return\": \"0.19\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 21,\n      \"ticker\": \"CVH\",\n      \"name\": \"Cablevision Holding\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"1660.00\",\n      \"daily_return\": \"0.24\",\n      \"price_date\": \"2023-07-14\"\n    }\n  ],\n  \"total\": 65,\n  \"page\": 1,\n  \"limit\": 20\n}"
+            }
+          ]
+        },
+        {
+          "name": "Search by ticker → 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/assets?ticker=pam",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "assets"
+              ],
+              "query": [
+                {
+                  "key": "ticker",
+                  "value": "pam"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Search by ticker → 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/assets?ticker=pam",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "assets"
+                  ],
+                  "query": [
+                    {
+                      "key": "ticker",
+                      "value": "pam"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 47,\n      \"ticker\": \"PAMP\",\n      \"name\": \"Pampa Holding S.A.\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"925.85\",\n      \"daily_return\": \"0.44\",\n      \"price_date\": \"2023-07-14\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"limit\": 20\n}"
+            }
+          ]
+        },
+        {
+          "name": "Search by name, paginated → 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/assets?name=banco&limit=2&page=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "assets"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "banco"
+                },
+                {
+                  "key": "limit",
+                  "value": "2"
+                },
+                {
+                  "key": "page",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Search by name, paginated → 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/assets?name=banco&limit=2&page=2",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "assets"
+                  ],
+                  "query": [
+                    {
+                      "key": "name",
+                      "value": "banco"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "2"
+                    },
+                    {
+                      "key": "page",
+                      "value": "2"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 31,\n      \"ticker\": \"BMA\",\n      \"name\": \"Banco Macro S.A.\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"1502.80\",\n      \"daily_return\": \"-1.15\",\n      \"price_date\": \"2023-07-14\"\n    },\n    {\n      \"id\": 19,\n      \"ticker\": \"BPAT\",\n      \"name\": \"Banco Patagonia\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"279.00\",\n      \"daily_return\": \"-3.46\",\n      \"price_date\": \"2023-07-14\"\n    }\n  ],\n  \"total\": 4,\n  \"page\": 2,\n  \"limit\": 2\n}"
+            }
+          ]
+        },
+        {
+          "name": "Name and ticker combined → 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/assets?name=banco&ticker=bma",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "assets"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "banco"
+                },
+                {
+                  "key": "ticker",
+                  "value": "bma"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Name and ticker combined → 200",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/assets?name=banco&ticker=bma",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "assets"
+                  ],
+                  "query": [
+                    {
+                      "key": "name",
+                      "value": "banco"
+                    },
+                    {
+                      "key": "ticker",
+                      "value": "bma"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 31,\n      \"ticker\": \"BMA\",\n      \"name\": \"Banco Macro S.A.\",\n      \"type\": \"ACCIONES\",\n      \"last_close\": \"1502.80\",\n      \"daily_return\": \"-1.15\",\n      \"price_date\": \"2023-07-14\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"limit\": 20\n}"
+            }
+          ]
+        },
+        {
+          "name": "Page past the end → 200 (empty data)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/assets?page=99",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "assets"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "99"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Page past the end → 200 (empty data)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/assets?page=99",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "assets"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "99"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"data\": [],\n  \"total\": 65,\n  \"page\": 99,\n  \"limit\": 20\n}"
+            }
+          ]
+        },
+        {
+          "name": "Unknown query param → 400",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/assets?foo=bar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "assets"
+              ],
+              "query": [
+                {
+                  "key": "foo",
+                  "value": "bar"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Unknown query param → 400",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/assets?foo=bar",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "assets"
+                  ],
+                  "query": [
+                    {
+                      "key": "foo",
+                      "value": "bar"
+                    }
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 400,\n  \"error\": \"BAD_REQUEST\",\n  \"message\": \"Validation failed\",\n  \"details\": [\n    {\n      \"field\": \"foo\",\n      \"message\": \"property foo should not exist\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "limit above 100 → 400",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/assets?limit=101",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "assets"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "101"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "limit above 100 → 400",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/assets?limit=101",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "assets"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "101"
+                    }
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 400,\n  \"error\": \"BAD_REQUEST\",\n  \"message\": \"Validation failed\",\n  \"details\": [\n    {\n      \"field\": \"limit\",\n      \"message\": \"limit must not be greater than 100\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "page is zero → 400",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/assets?page=0",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "assets"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "page is zero → 400",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/assets?page=0",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "assets"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    }
+                  ]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 400,\n  \"error\": \"BAD_REQUEST\",\n  \"message\": \"Validation failed\",\n  \"details\": [\n    {\n      \"field\": \"page\",\n      \"message\": \"page must not be greater than 2147483647\"\n    },\n    {\n      \"field\": \"page\",\n      \"message\": \"page must not be less than 1\"\n    },\n    {\n      \"field\": \"page\",\n      \"message\": \"page must be an integer number\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Orders / Success",
+      "item": [
+        {
+          "name": "MARKET BUY by size → 201 FILLED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "MARKET BUY by size → 201 FILLED",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 10\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"id\": 12,\n  \"instrument_id\": 47,\n  \"user_id\": 1,\n  \"side\": \"BUY\",\n  \"size\": 10,\n  \"price\": \"925.85\",\n  \"type\": \"MARKET\",\n  \"status\": \"FILLED\",\n  \"rejection_reason\": null,\n  \"datetime\": \"2026-11-10T21:38:11.902Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "MARKET BUY by amount → 201 FILLED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"amount\": \"10000.00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "MARKET BUY by amount → 201 FILLED",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"amount\": \"10000.00\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"id\": 13,\n  \"instrument_id\": 47,\n  \"user_id\": 1,\n  \"side\": \"BUY\",\n  \"size\": 10,\n  \"price\": \"925.85\",\n  \"type\": \"MARKET\",\n  \"status\": \"FILLED\",\n  \"rejection_reason\": null,\n  \"datetime\": \"2026-11-10T21:38:11.917Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "LIMIT BUY → 201 NEW",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"size\": 5,\n  \"price\": \"900.00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "LIMIT BUY → 201 NEW",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"size\": 5,\n  \"price\": \"900.00\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"id\": 14,\n  \"instrument_id\": 47,\n  \"user_id\": 1,\n  \"side\": \"BUY\",\n  \"size\": 5,\n  \"price\": \"900.00\",\n  \"type\": \"LIMIT\",\n  \"status\": \"NEW\",\n  \"rejection_reason\": null,\n  \"datetime\": \"2026-11-10T21:38:11.923Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "MARKET SELL → 201 FILLED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"SELL\",\n  \"type\": \"MARKET\",\n  \"size\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "MARKET SELL → 201 FILLED",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"SELL\",\n  \"type\": \"MARKET\",\n  \"size\": 5\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"id\": 15,\n  \"instrument_id\": 47,\n  \"user_id\": 1,\n  \"side\": \"SELL\",\n  \"size\": 5,\n  \"price\": \"925.85\",\n  \"type\": \"MARKET\",\n  \"status\": \"FILLED\",\n  \"rejection_reason\": null,\n  \"datetime\": \"2026-11-10T21:38:11.929Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "LIMIT SELL → 201 NEW",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 54,\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"size\": 100,\n  \"price\": \"260.00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "LIMIT SELL → 201 NEW",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 54,\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"size\": 100,\n  \"price\": \"260.00\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"id\": 16,\n  \"instrument_id\": 54,\n  \"user_id\": 1,\n  \"side\": \"SELL\",\n  \"size\": 100,\n  \"price\": \"260.00\",\n  \"type\": \"LIMIT\",\n  \"status\": \"NEW\",\n  \"rejection_reason\": null,\n  \"datetime\": \"2026-11-10T21:38:11.935Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "CASH_IN → 201 FILLED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 66,\n  \"side\": \"CASH_IN\",\n  \"type\": \"MARKET\",\n  \"size\": 50000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "CASH_IN → 201 FILLED",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 66,\n  \"side\": \"CASH_IN\",\n  \"type\": \"MARKET\",\n  \"size\": 50000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"id\": 17,\n  \"instrument_id\": 66,\n  \"user_id\": 1,\n  \"side\": \"CASH_IN\",\n  \"size\": 50000,\n  \"price\": \"1.00\",\n  \"type\": \"MARKET\",\n  \"status\": \"FILLED\",\n  \"rejection_reason\": null,\n  \"datetime\": \"2026-11-10T21:38:11.941Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "CASH_OUT → 201 FILLED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 66,\n  \"side\": \"CASH_OUT\",\n  \"type\": \"MARKET\",\n  \"size\": 1000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "CASH_OUT → 201 FILLED",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 66,\n  \"side\": \"CASH_OUT\",\n  \"type\": \"MARKET\",\n  \"size\": 1000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"id\": 18,\n  \"instrument_id\": 66,\n  \"user_id\": 1,\n  \"side\": \"CASH_OUT\",\n  \"size\": 1000,\n  \"price\": \"1.00\",\n  \"type\": \"MARKET\",\n  \"status\": \"FILLED\",\n  \"rejection_reason\": null,\n  \"datetime\": \"2026-11-10T21:38:11.946Z\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Orders / REJECTED",
+      "item": [
+        {
+          "name": "BUY above available cash → 201 REJECTED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 100000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "BUY above available cash → 201 REJECTED",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 100000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"id\": 19,\n  \"instrument_id\": 47,\n  \"user_id\": 1,\n  \"side\": \"BUY\",\n  \"size\": 100000,\n  \"price\": \"925.85\",\n  \"type\": \"MARKET\",\n  \"status\": \"REJECTED\",\n  \"rejection_reason\": \"INSUFFICIENT_FUNDS\",\n  \"datetime\": \"2026-11-10T21:38:11.952Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "SELL above held shares → 201 REJECTED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"SELL\",\n  \"type\": \"MARKET\",\n  \"size\": 100000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "SELL above held shares → 201 REJECTED",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"SELL\",\n  \"type\": \"MARKET\",\n  \"size\": 100000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"id\": 20,\n  \"instrument_id\": 47,\n  \"user_id\": 1,\n  \"side\": \"SELL\",\n  \"size\": 100000,\n  \"price\": \"925.85\",\n  \"type\": \"MARKET\",\n  \"status\": \"REJECTED\",\n  \"rejection_reason\": \"INSUFFICIENT_SHARES\",\n  \"datetime\": \"2026-11-10T21:38:11.957Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "CASH_OUT above available cash → 201 REJECTED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 66,\n  \"side\": \"CASH_OUT\",\n  \"type\": \"MARKET\",\n  \"size\": 100000000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "CASH_OUT above available cash → 201 REJECTED",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 66,\n  \"side\": \"CASH_OUT\",\n  \"type\": \"MARKET\",\n  \"size\": 100000000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"id\": 21,\n  \"instrument_id\": 66,\n  \"user_id\": 1,\n  \"side\": \"CASH_OUT\",\n  \"size\": 100000000,\n  \"price\": \"1.00\",\n  \"type\": \"MARKET\",\n  \"status\": \"REJECTED\",\n  \"rejection_reason\": \"INSUFFICIENT_FUNDS\",\n  \"datetime\": \"2026-11-10T21:38:11.963Z\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Orders / 400",
+      "item": [
+        {
+          "name": "Neither size nor amount → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Neither size nor amount → 400",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 400,\n  \"error\": \"BAD_REQUEST\",\n  \"message\": \"Validation failed\",\n  \"details\": [\n    {\n      \"field\": \"amount\",\n      \"message\": \"either size or amount is required\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Both size and amount → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 1,\n  \"amount\": \"1000.00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Both size and amount → 400",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 1,\n  \"amount\": \"1000.00\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 400,\n  \"error\": \"BAD_REQUEST\",\n  \"message\": \"Validation failed\",\n  \"details\": [\n    {\n      \"field\": \"amount\",\n      \"message\": \"size and amount cannot be sent together\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "LIMIT without price → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"size\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "LIMIT without price → 400",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"size\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 400,\n  \"error\": \"BAD_REQUEST\",\n  \"message\": \"Validation failed\",\n  \"details\": [\n    {\n      \"field\": \"price\",\n      \"message\": \"price is required for LIMIT orders\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "MARKET with price → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 1,\n  \"price\": \"900.00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "MARKET with price → 400",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 1,\n  \"price\": \"900.00\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 400,\n  \"error\": \"BAD_REQUEST\",\n  \"message\": \"Validation failed\",\n  \"details\": [\n    {\n      \"field\": \"price\",\n      \"message\": \"price must not be sent for MARKET orders\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cash order with LIMIT → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 66,\n  \"side\": \"CASH_IN\",\n  \"type\": \"LIMIT\",\n  \"size\": 100,\n  \"price\": \"1.00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Cash order with LIMIT → 400",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 66,\n  \"side\": \"CASH_IN\",\n  \"type\": \"LIMIT\",\n  \"size\": 100,\n  \"price\": \"1.00\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 400,\n  \"error\": \"BAD_REQUEST\",\n  \"message\": \"Validation failed\",\n  \"details\": [\n    {\n      \"field\": \"type\",\n      \"message\": \"cash orders (CASH_IN, CASH_OUT) must be MARKET\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Side not in uppercase → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"buy\",\n  \"type\": \"MARKET\",\n  \"size\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Side not in uppercase → 400",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"buy\",\n  \"type\": \"MARKET\",\n  \"size\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 400,\n  \"error\": \"BAD_REQUEST\",\n  \"message\": \"Validation failed\",\n  \"details\": [\n    {\n      \"field\": \"side\",\n      \"message\": \"side must be one of the following values: BUY, SELL, CASH_IN, CASH_OUT\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Price with 3 decimals → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"size\": 1,\n  \"price\": \"900.123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Price with 3 decimals → 400",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"size\": 1,\n  \"price\": \"900.123\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 400,\n  \"error\": \"BAD_REQUEST\",\n  \"message\": \"Validation failed\",\n  \"details\": [\n    {\n      \"field\": \"price\",\n      \"message\": \"price must be a positive decimal string with at most 2 decimals and at most 99999999.99\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Unknown body property → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 1,\n  \"foo\": \"bar\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Unknown body property → 400",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 1,\n  \"foo\": \"bar\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 400,\n  \"error\": \"BAD_REQUEST\",\n  \"message\": \"Validation failed\",\n  \"details\": [\n    {\n      \"field\": \"foo\",\n      \"message\": \"property foo should not exist\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Malformed user id → 400",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/abc/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "abc",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Malformed user id → 400",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/abc/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "abc",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 400,\n  \"error\": \"BAD_REQUEST\",\n  \"message\": \"id must be a positive integer up to 2147483647\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Orders / 404",
+      "item": [
+        {
+          "name": "Unknown user → 404",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/999/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "999",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Unknown user → 404",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/999/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "999",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 404,\n  \"error\": \"USER_NOT_FOUND\",\n  \"message\": \"User 999 not found\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Orders / 422",
+      "item": [
+        {
+          "name": "Unknown instrument → 422 INSTRUMENT_NOT_FOUND",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 9999,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Unknown instrument → 422 INSTRUMENT_NOT_FOUND",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 9999,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 422,\n  \"error\": \"INSTRUMENT_NOT_FOUND\",\n  \"message\": \"Instrument 9999 not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "BUY on the ARS instrument → 422 SIDE_INSTRUMENT_MISMATCH",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 66,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "BUY on the ARS instrument → 422 SIDE_INSTRUMENT_MISMATCH",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 66,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 10\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 422,\n  \"error\": \"SIDE_INSTRUMENT_MISMATCH\",\n  \"message\": \"Instrument 66 is the cash instrument and only accepts CASH_IN and CASH_OUT\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "CASH_IN on a stock → 422 SIDE_INSTRUMENT_MISMATCH",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"CASH_IN\",\n  \"type\": \"MARKET\",\n  \"size\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "CASH_IN on a stock → 422 SIDE_INSTRUMENT_MISMATCH",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"CASH_IN\",\n  \"type\": \"MARKET\",\n  \"size\": 10\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 422,\n  \"error\": \"SIDE_INSTRUMENT_MISMATCH\",\n  \"message\": \"Side CASH_IN is only valid on the cash instrument\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Instrument without market data → 422 NO_MARKET_DATA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 3,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Instrument without market data → 422 NO_MARKET_DATA",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 3,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"size\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 422,\n  \"error\": \"NO_MARKET_DATA\",\n  \"message\": \"Instrument 3 has no market data\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Amount too small for one share → 422 ZERO_SHARES",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"amount\": \"1.00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Amount too small for one share → 422 ZERO_SHARES",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"MARKET\",\n  \"amount\": \"1.00\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 422,\n  \"error\": \"ZERO_SHARES\",\n  \"message\": \"The amount is not enough for a single share\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Amount results in too many shares → 422 SIZE_OUT_OF_RANGE",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "orders"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"amount\": \"99999999.99\",\n  \"price\": \"0.01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Amount results in too many shares → 422 SIZE_OUT_OF_RANGE",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/users/1/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "1",
+                    "orders"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instrument_id\": 47,\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"amount\": \"99999999.99\",\n  \"price\": \"0.01\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"status_code\": 422,\n  \"error\": \"SIZE_OUT_OF_RANGE\",\n  \"message\": \"The amount results in more than 2147483647 shares\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
