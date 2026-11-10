@@ -127,9 +127,9 @@ Status of every entry: **Accepted**, unless marked otherwise.
 
 **Options.** (a) Compute on read from `orders`. (b) Maintain a positions/balances table updated in the order transaction.
 
-**Decision.** (a). Cash and share totals are SQL aggregates; per-user data is small and indexed by `(userid, instrumentid)`.
+**Decision.** (a). The user's `FILLED` and `NEW` orders are loaded in one query and pure domain functions compute cash, reservations and positions from them (the same functions back the order checks). Per-user data is small and indexed by `(userid, instrumentid)`.
 
-**Consequences.** Always consistent with the ledger, no projection to keep in sync. At scale, a positions projection updated transactionally and a Redis cache for latest prices would be the next step (ADR-20).
+**Consequences.** Always consistent with the ledger, no projection to keep in sync. Sums are not delegated to SQL, so every rule lives in one unit-tested place. At scale, a positions projection updated transactionally and a Redis cache for latest prices would be the next step (ADR-20).
 
 ## ADR-10: Cash, reservations and total value
 
@@ -154,7 +154,7 @@ Status of every entry: **Accepted**, unless marked otherwise.
 
 The average is a **running** average, computed by a pure domain function over the user's FILLED orders sorted by `datetime, id`: a BUY updates the average; a SELL reduces shares and keeps the average. A SQL `Σ cost / Σ shares` is wrong after sells (buy 10@100, sell 5, buy 5@200 → correct average 150, naive 133.33), so it is not used.
 
-**Consequences.** The function is unit-testable in isolation. Daily return (`close` vs `previousClose`) is not part of the response.
+**Consequences.** The function is unit-testable in isolation. A `FILLED` SELL that takes shares below 0 means the ledger is inconsistent: the domain throws and the endpoint answers 500 (logged) instead of displaying a corrupt position. The same applies to a held instrument without a price. Daily return (`close` vs `previousClose`) is not part of the response.
 
 ## ADR-12: Concurrency: row lock on user
 
@@ -248,4 +248,6 @@ The average is a **running** average, computed by a pure domain function over th
 
 **Decision.** Migrations run only through npm scripts (`migration:create`, `migration:generate`, `migration:run`, `migration:revert`). The app sets `migrationsRun: false` and `synchronize: false`. One function, `buildDataSourceOptions`, builds the options for both the Nest app and the CLI data source.
 
-**Consequences.** Starting the app never alters the schema; applying a migration is a deliberate step. A fresh database needs `npm run migration:run` after the seed is loaded. The app and the CLI cannot drift apart on entities or settings.
+**Addendum.** On boot the app runs a read-only check and fails fast if migrations are pending, with a message pointing to `npm run migration:run` and warning that it modifies the database `DATABASE_URL` points to. The check uses `MigrationExecutor.getPendingMigrations()`, not `DataSource.showMigrations()`, which creates the migrations table. `npm run db:up` runs the migrations, but only against the local Docker database (its URL is pinned in the script).
+
+**Consequences.** Starting the app never alters the schema; applying a migration is a deliberate step, and a stale schema cannot serve requests. A fresh database needs `npm run migration:run` after the seed is loaded (`db:up` does it for the local one). The app and the CLI cannot drift apart on entities or settings.
