@@ -9,8 +9,7 @@ Requirements: Node 24 (`.nvmrc`) and Docker.
 ```bash
 npm install
 cp .env.example .env
-npm run db:up        # start Postgres, seeded from db/database.sql
-npm run migration:run
+npm run db:up        # start Postgres (seeded), wait until healthy, run migrations
 npm run start:dev
 ```
 
@@ -19,7 +18,7 @@ npm run start:dev
 
 ### Database
 
-`docker-compose.yml` runs Postgres 17 on host port **5433** (so it does not clash with a native Postgres on 5432). The container loads `db/database.sql` only the first time it starts with an empty volume. To wipe the data and reseed, run `npm run db:reset`.
+`docker-compose.yml` runs Postgres 17 on host port **5433** (so it does not clash with a native Postgres on 5432). The container loads `db/database.sql` only the first time it starts with an empty volume. `npm run db:up` also runs the migrations, always against this local database (the URL is pinned in the script, so it never touches the `DATABASE_URL` in `.env`). To wipe the data, reseed and re-migrate, run `npm run db:reset`.
 
 ### Environment variables
 
@@ -37,7 +36,7 @@ Validated on boot; the app refuses to start if one is invalid.
 
 ### Migrations
 
-The schema is managed only by migrations (`synchronize` is always `false`), and the app never runs them on boot (ADR-21).
+The schema is managed only by migrations (`synchronize` is always `false`), and the app never runs them on boot (ADR-21). On boot it only checks: if migrations are pending, startup fails with a message to run `npm run migration:run`. That command modifies the database `DATABASE_URL` points to.
 
 ```bash
 npm run migration:create src/database/migrations/<Name>

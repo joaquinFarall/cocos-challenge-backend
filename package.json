@@ -24,8 +24,8 @@
     "migration:generate": "npm run typeorm -- migration:generate",
     "migration:run": "npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert",
-    "db:up": "docker compose up -d --wait db",
-    "db:reset": "docker compose down -v && docker compose up -d --wait db"
+    "db:up": "docker compose up -d --wait db && DATABASE_URL=postgresql://cocos:cocos@localhost:5433/cocos npm run migration:run",
+    "db:reset": "docker compose down -v && npm run db:up"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",
