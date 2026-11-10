@@ -7,6 +7,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { ErrorResponseDto } from '../common/errors/error-response.dto';
 import { ParseIdPipe } from '../common/pipes/parse-id.pipe';
 import { PortfolioResponseDto } from './dto/portfolio-response.dto';
 import { PortfolioService } from './portfolio.service';
@@ -29,8 +30,14 @@ export class PortfolioController {
     example: 1,
   })
   @ApiOkResponse({ type: PortfolioResponseDto })
-  @ApiBadRequestResponse({ description: 'Malformed id' })
-  @ApiNotFoundResponse({ description: 'User not found' })
+  @ApiBadRequestResponse({
+    description: 'Malformed id',
+    type: ErrorResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+    type: ErrorResponseDto,
+  })
   get(@Param('id', ParseIdPipe) id: number): Promise<PortfolioResponseDto> {
     return this.portfolio.getPortfolio(id);
   }

@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AllExceptionsFilter } from './common/errors/all-exceptions.filter';
+import { AppValidationPipe } from './common/validation/validation.pipe';
 import { validateEnv } from './config/env.validation';
 import { buildDataSourceOptions } from './database/data-source-options';
 import { PendingMigrationsCheck } from './database/pending-migrations.check';
@@ -20,6 +23,10 @@ import { PortfolioModule } from './portfolio/portfolio.module';
     HealthModule,
     PortfolioModule,
   ],
-  providers: [PendingMigrationsCheck],
+  providers: [
+    PendingMigrationsCheck,
+    { provide: APP_PIPE, useClass: AppValidationPipe },
+    { provide: APP_FILTER, useClass: AllExceptionsFilter },
+  ],
 })
 export class AppModule {}

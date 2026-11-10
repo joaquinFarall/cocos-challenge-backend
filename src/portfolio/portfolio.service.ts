@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { ApiException } from '../common/errors/api.exception';
 import { toMoneyString } from '../domain/decimal';
 import { buildPortfolio, computePositions } from '../domain/portfolio';
 import { PortfolioResponseDto } from './dto/portfolio-response.dto';
@@ -10,7 +11,8 @@ export class PortfolioService {
 
   async getPortfolio(userId: number): Promise<PortfolioResponseDto> {
     const user = await this.repository.findUser(userId);
-    if (!user) throw new NotFoundException(`User ${userId} not found`);
+    if (!user)
+      throw new ApiException(404, 'USER_NOT_FOUND', `User ${userId} not found`);
 
     const orders = await this.repository.findRelevantOrders(userId);
     const positions = computePositions(orders);
