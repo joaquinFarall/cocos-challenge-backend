@@ -25,6 +25,19 @@ describe('Error response format', () => {
     expect(res.body).toMatchObject({ status_code: 400, error: 'BAD_REQUEST' });
   });
 
+  it.each(['0', '-1', '01', '1.0', '1e3', '2147483648'])(
+    'path id %j is 400 (ADR-02)',
+    async (id) => {
+      const res = await request(app.getHttpServer())
+        .get(`/users/${id}/portfolio`)
+        .expect(400);
+      expect(res.body).toMatchObject({
+        status_code: 400,
+        error: 'BAD_REQUEST',
+      });
+    },
+  );
+
   it('an unknown user is 404 USER_NOT_FOUND', async () => {
     const res = await request(app.getHttpServer())
       .get('/users/2147483647/portfolio')

@@ -35,6 +35,14 @@ export class AppValidationPipe extends ValidationPipe {
   }
 
   override async transform(value: unknown, metadata: ArgumentMetadata) {
+    // With `transform: true`, Nest coerces a named param/query typed `number`
+    // with `+value`, so "01" or "1e3" would reach ParseIdPipe as a valid 1 / 1000.
+    if (
+      (metadata.type === 'param' || metadata.type === 'query') &&
+      metadata.data !== undefined
+    ) {
+      return value;
+    }
     if (
       metadata.type === 'body' &&
       (typeof value !== 'object' || value === null || Array.isArray(value))
