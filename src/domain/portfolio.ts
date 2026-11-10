@@ -4,6 +4,7 @@ import type { OrderSide, OrderStatus } from './enums';
 /** The fields of an order the portfolio needs. The Order entity satisfies it. */
 export interface LedgerOrder {
   id: number;
+  userId: number;
   instrumentId: number;
   side: OrderSide;
   status: OrderStatus;
@@ -31,7 +32,19 @@ export interface Portfolio {
 }
 
 /** The ledger contradicts itself (e.g. a FILLED SELL of shares never held). */
-export class LedgerInconsistencyError extends Error {}
+export class LedgerInconsistencyError extends Error {
+  constructor(
+    message: string,
+    readonly context: {
+      userId: number;
+      instrumentId: number;
+      orderId?: number;
+    },
+  ) {
+    super(message);
+    this.name = 'LedgerInconsistencyError';
+  }
+}
 
 const amount = (order: LedgerOrder): D => order.price.mul(order.size);
 
@@ -91,6 +104,11 @@ export function computePositions(orders: readonly LedgerOrder[]): Position[] {
       if (shares < 0) {
         throw new LedgerInconsistencyError(
           `Order ${order.id} sells ${order.size} of instrument ${order.instrumentId} but only ${current.shares} are held`,
+          {
+            userId: order.userId,
+            orderId: order.id,
+            instrumentId: order.instrumentId,
+          },
         );
       }
       current.shares = shares;
@@ -123,6 +141,11 @@ export function buildPortfolio(
     if (!close) {
       throw new LedgerInconsistencyError(
         `No market price for held instrument ${position.instrumentId}`,
+        {
+          userId: orders.find((o) => o.instrumentId === position.instrumentId)!
+            .userId,
+          instrumentId: position.instrumentId,
+        },
       );
     }
     const value = close.mul(position.shares);

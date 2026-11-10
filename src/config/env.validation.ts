@@ -22,6 +22,10 @@ export class EnvironmentVariables {
   @Max(65535)
   PORT: number = 8080;
 
+  @IsOptional()
+  @IsIn(['fatal', 'error', 'warn', 'info', 'debug', 'trace'])
+  LOG_LEVEL: string = 'info';
+
   @IsString()
   @IsUrl(
     { protocols: ['postgres', 'postgresql'], require_tld: false },

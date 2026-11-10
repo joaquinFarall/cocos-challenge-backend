@@ -15,6 +15,15 @@ const PAMP = 47;
 const BMA = 31;
 const METR = 54;
 
+function catchError(fn: () => unknown): unknown {
+  try {
+    fn();
+  } catch (error) {
+    return error;
+  }
+  throw new Error('Expected the function to throw');
+}
+
 let nextId = 1;
 function order(
   side: OrderSide,
@@ -27,6 +36,7 @@ function order(
 ): LedgerOrder {
   return {
     id,
+    userId: 1,
     instrumentId,
     side,
     status,
@@ -145,12 +155,18 @@ describe('computePositions', () => {
   });
 
   it('throws when a FILLED SELL takes shares below 0', () => {
-    expect(() =>
+    const thrown = catchError(() =>
       computePositions([
-        order('BUY', BMA, 20, '1540', 'FILLED', '2023-07-13T12:51:20Z'),
-        order('SELL', BMA, 30, '1530', 'FILLED', '2023-07-13T15:13:20Z'),
+        order('BUY', BMA, 20, '1540', 'FILLED', '2023-07-13T12:51:20Z', 9),
+        order('SELL', BMA, 30, '1530', 'FILLED', '2023-07-13T15:13:20Z', 11),
       ]),
-    ).toThrow(LedgerInconsistencyError);
+    );
+    expect(thrown).toBeInstanceOf(LedgerInconsistencyError);
+    expect((thrown as LedgerInconsistencyError).context).toEqual({
+      userId: 1,
+      orderId: 11,
+      instrumentId: BMA,
+    });
   });
 });
 
@@ -185,9 +201,14 @@ describe('buildPortfolio', () => {
 
   it('throws when a held instrument has no close', () => {
     const orders = [order('BUY', PAMP, 1, '100')];
-    expect(() =>
+    const thrown = catchError(() =>
       buildPortfolio(orders, computePositions(orders), new Map()),
-    ).toThrow(LedgerInconsistencyError);
+    );
+    expect(thrown).toBeInstanceOf(LedgerInconsistencyError);
+    expect((thrown as LedgerInconsistencyError).context).toEqual({
+      userId: 1,
+      instrumentId: PAMP,
+    });
   });
 
   describe('seed scenario (user 1, after the ADR-16 correction)', () => {

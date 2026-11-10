@@ -24,11 +24,16 @@ npm run start:dev
 
 Validated on boot; the app refuses to start if one is invalid.
 
-| Variable       | Default       | Description                               |
-| -------------- | ------------- | ----------------------------------------- |
-| `PORT`         | `8080`        | HTTP port                                 |
-| `NODE_ENV`     | `development` | `development`, `test` or `production`     |
-| `DATABASE_URL` | (required)    | `postgresql://user:password@host:port/db` |
+| Variable       | Default       | Description                                          |
+| -------------- | ------------- | ---------------------------------------------------- |
+| `PORT`         | `8080`        | HTTP port                                            |
+| `NODE_ENV`     | `development` | `development`, `test` or `production`                |
+| `LOG_LEVEL`    | `info`        | `fatal`, `error`, `warn`, `info`, `debug` or `trace` |
+| `DATABASE_URL` | (required)    | `postgresql://user:password@host:port/db`            |
+
+### Logging
+
+Logs go to stdout through pino: one JSON line per request (method, path, status, duration, request id), human-readable when `NODE_ENV=development`, silent when `NODE_ENV=test`. Every response carries an `X-Request-Id` header: the client's value if it is valid, a generated UUID otherwise. Request bodies and personal data are never logged. `GET /health` is not logged.
 
 ### Health check
 

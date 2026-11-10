@@ -7,6 +7,13 @@ describe('validateEnv', () => {
     const env = validateEnv({ DATABASE_URL: url });
     expect(env.PORT).toBe(8080);
     expect(env.NODE_ENV).toBe('development');
+    expect(env.LOG_LEVEL).toBe('info');
+  });
+
+  it('rejects an unknown LOG_LEVEL', () => {
+    expect(() => validateEnv({ DATABASE_URL: url, LOG_LEVEL: 'loud' })).toThrow(
+      /LOG_LEVEL/,
+    );
   });
 
   it('coerces PORT to a number', () => {

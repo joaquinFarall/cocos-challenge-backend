@@ -5,6 +5,7 @@ import { validateEnv } from './config/env.validation';
 import { buildDataSourceOptions } from './database/data-source-options';
 import { PendingMigrationsCheck } from './database/pending-migrations.check';
 import { HealthModule } from './health/health.module';
+import { LoggingModule } from './logging/logging.module';
 import { PortfolioModule } from './portfolio/portfolio.module';
 
 @Module({
@@ -15,6 +16,7 @@ import { PortfolioModule } from './portfolio/portfolio.module';
       useFactory: (config: ConfigService) =>
         buildDataSourceOptions(config.getOrThrow<string>('DATABASE_URL')),
     }),
+    LoggingModule,
     HealthModule,
     PortfolioModule,
   ],
