@@ -1,4 +1,4 @@
-import type Decimal from 'decimal.js';
+import type { D } from '../../domain/decimal';
 import {
   Check,
   Column,
@@ -63,7 +63,7 @@ export class Order {
     scale: 2,
     transformer: DecimalTransformer,
   })
-  price: Decimal;
+  price: D;
 
   @Column({ type: 'varchar', length: 10 })
   type: OrderType;

@@ -1,4 +1,4 @@
-import type Decimal from 'decimal.js';
+import type { D } from '../../domain/decimal';
 import {
   Column,
   Entity,
@@ -31,19 +31,19 @@ export class MarketData {
   instrument?: Instrument;
 
   @Column({ ...numeric, nullable: true })
-  high: Decimal | null;
+  high: D | null;
 
   @Column({ ...numeric, nullable: true })
-  low: Decimal | null;
+  low: D | null;
 
   @Column({ ...numeric, nullable: true })
-  open: Decimal | null;
+  open: D | null;
 
   @Column(numeric)
-  close: Decimal;
+  close: D;
 
   @Column({ ...numeric, name: 'previousclose' })
-  previousClose: Decimal;
+  previousClose: D;
 
   @Column({ type: 'date' })
   date: string;
