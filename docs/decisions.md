@@ -113,12 +113,14 @@ Status of every entry: **Accepted**, unless marked otherwise.
 
 **Decision.** `GET /assets` accepts only `name`, `ticker`, `page` (default 1) and `limit` (default 20, max 100). Any other param is 400.
 
-- Case-insensitive partial match (`ILIKE`), with `%` and `_` in user input escaped.
+- Case-insensitive partial match (`ILIKE`), with `%`, `_` and `\` in user input escaped.
 - Accents are not handled (e.g. `Rio` does not match `Río`); documented.
-- Both filters combine with AND. Empty strings are ignored.
+- Both filters combine with AND. `name` and `ticker` are trimmed; empty or whitespace-only values are ignored. Max 255 characters after trimming, otherwise 400.
+- `page` and `limit` are strict integers like path ids (ADR-02): `^[1-9]\d*$`, `page` ≤ 2147483647, `limit` ≤ 100. Anything else (`0`, `01`, `1.5`, `1e2`, empty, repeated) is 400.
 - ARS (`MONEDA`) is excluded.
 - Sorted by `ticker`.
-- Response: `{ "data": [{ id, ticker, name, type, last_close }], "total", "page", "limit" }`.
+- Response: `{ "data": [{ id, ticker, name, type, last_close, daily_return, price_date }], "total", "page", "limit" }`.
+- `last_close`, `daily_return` and `price_date` come from the marketdata row with the latest `date`. `daily_return` is `(close − previousClose) / previousClose × 100`, a 2-decimal string rounded half-up, computed by a pure domain function. `price_date` is that row's date as `YYYY-MM-DD`. All three are `null` when the instrument has no marketdata. A `previousClose` of 0 would make `daily_return` `null`; the seed has none.
 - No matches, or a page past the end → 200 with `data: []` (and the real `total`).
 
 **Consequences.** With no params the API returns the first page, not all assets; this changes the draft's original "no params returns all". Using `pg_trgm` / `unaccent` is the documented improvement (ADR-20).
@@ -156,7 +158,7 @@ Status of every entry: **Accepted**, unless marked otherwise.
 
 The average is a **running** average, computed by a pure domain function over the user's FILLED orders sorted by `datetime, id`: a BUY updates the average; a SELL reduces shares and keeps the average. A SQL `Σ cost / Σ shares` is wrong after sells (buy 10@100, sell 5, buy 5@200 → correct average 150, naive 133.33), so it is not used.
 
-**Consequences.** The function is unit-testable in isolation. A `FILLED` SELL that takes shares below 0 means the ledger is inconsistent: the domain throws and the endpoint answers 500 (logged) instead of displaying a corrupt position. The same applies to a held instrument without a price. Daily return (`close` vs `previousClose`) is not part of the response.
+**Consequences.** The function is unit-testable in isolation. A `FILLED` SELL that takes shares below 0 means the ledger is inconsistent: the domain throws and the endpoint answers 500 (logged) instead of displaying a corrupt position. The same applies to a held instrument without a price.
 
 ## ADR-12: Concurrency: row lock on user
 
@@ -237,7 +239,7 @@ The average is a **running** average, computed by a pure domain function over th
 - UUIDs instead of sequential ids, to prevent id enumeration.
 - Idempotency keys (ADR-13).
 - Authentication and authorization.
-- Daily return from `close` / `previousClose` (note: BBAR on 2023-07-14 has `previousClose` 1047.166 vs the previous `close` 1062.20, and 3 decimals do not fit NUMERIC(10,2)).
+- Daily return is exposed only by `/assets` (ADR-08), not by `/portfolio`. Note: `previousClose` is not always the previous row's `close` (BBAR on 2023-07-14 has `previousClose` 1047.166 in the seed, stored as 1047.17 by NUMERIC(10,2), vs the previous `close` 1062.20); the API trusts `previousClose` as the spec says.
 
 ## ADR-21: Running migrations
 

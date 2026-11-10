@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AllExceptionsFilter } from './common/errors/all-exceptions.filter';
 import { AppValidationPipe } from './common/validation/validation.pipe';
 import { validateEnv } from './config/env.validation';
+import { AssetsModule } from './assets/assets.module';
 import { buildDataSourceOptions } from './database/data-source-options';
 import { PendingMigrationsCheck } from './database/pending-migrations.check';
 import { HealthModule } from './health/health.module';
@@ -24,6 +25,7 @@ import { PortfolioModule } from './portfolio/portfolio.module';
     HealthModule,
     PortfolioModule,
     OrdersModule,
+    AssetsModule,
   ],
   providers: [
     PendingMigrationsCheck,

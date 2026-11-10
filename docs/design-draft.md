@@ -70,6 +70,8 @@ Response body:
     - name
     - type
     - last_close (null when the instrument has no marketdata)
+    - daily_return (%, 2 decimals; (close - previous_close) / previous_close x 100; null without marketdata)
+    - price_date (date of the marketdata row used, YYYY-MM-DD; null without marketdata)
   - total
   - page
   - limit
@@ -78,7 +80,8 @@ Considerations:
   - no params returns the first page
   - only accepts params name, ticker, page and limit, otherwise 400
   - the search is a case-insensitive partial match, accents are not handled
-  - name and ticker combine with AND; empty strings are ignored
+  - name and ticker are trimmed and combine with AND; empty or blank values are ignored; max 255 chars, otherwise 400
+  - page and limit must match ^[1-9]\d*$ (page <= 2147483647, limit <= 100), otherwise 400
   - ARS (type MONEDA) is excluded
   - sorted by ticker
   - when search criteria is not matched (or the page is past the end) returns data: [] with 200 [ADR-08]
